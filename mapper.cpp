@@ -18,17 +18,23 @@ std::string exec(const char* cmd) {
     return result;
 }
 
-int main(int argc, char** argv) {
-    std::string device = exec("xinput list | grep -i '↳' | dmenu -i -l 15 -p 'Device: '");
+int mapToOutput() {
+    std::string device = exec("xinput list | grep -i '↳' | sed 's|[↳,\t,⎜]||g' | dmenu -i -l 15 -p 'Device: '");
     if(device.empty())
     	return 0;
     device = device.substr(device.find("id=")+3);
-    device = device.substr(0, device.find('\t'));
-    std::string output = exec("xrandr | grep -i -E 'dvi|hdmi|vga' | grep -i ' connected' | dmenu -i -l 15 -p 'Map to output: '");
+    device = device.substr(0, device.find('['));
+    std::string output = exec("xrandr --listactivemonitors | grep -i -E '[0-9]:' | dmenu -i -l 15 -p 'Map to output: '");
     if(output.empty())
     	return 0;
-    output = output.substr(0, output.find(' '));
-    std::string wacomExec = "xsetwacom set "+device+" MapToOutput "+output;
+    std::size_t found = output.find_last_of(' ');
+   	output = output.substr(found+1);
+    std::string wacomExec = "xsetwacom set \""+device+"\" MapToOutput "+output;
     std::cout << exec(wacomExec.c_str()) << std::endl;
+    return 0;
+}
+
+int main(int argc, char** argv) {
+	mapToOutput();
 	return 0;
 }
