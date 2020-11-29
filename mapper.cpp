@@ -19,12 +19,12 @@ std::string exec(const char* cmd) {
 }
 
 int mapToOutput() {
-    std::string device = exec("xinput list | grep -i '↳' | sed 's|[↳,\t,⎜]||g' | dmenu -i -l 15 -p 'Device: '");
+    std::string device = exec("xinput list | grep -i '↳' | sed 's|[↳,\t,⎜]||g' | awk '{$1=$1;print}' | dmenu -i -l 15 -p 'Device: '");
     if(device.empty())
     	return 0;
     device = device.substr(device.find("id=")+3);
     device = device.substr(0, device.find('['));
-    std::string output = exec("xrandr --listactivemonitors | grep -i -E '[0-9]:' | dmenu -i -l 15 -p 'Map to output: '");
+    std::string output = exec("xrandr --listactivemonitors | grep -i -E '[0-9]:' | awk '{$1=$1;print}' | dmenu -i -l 15 -p 'Map to output: '");
     if(output.empty())
     	return 0;
     std::size_t found = output.find_last_of(' ');
